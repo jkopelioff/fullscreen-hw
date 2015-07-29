@@ -171,6 +171,11 @@ extension PhotoCollectionViewController: UICollectionViewDataSource
         let photo:FlickrPhoto = self.photos[indexPath.row]
         
         cell.idLabel.text = String(photo.id)
+        
+        if photo.type == FlickrPhotoType.Video {
+            cell.videoPlayButton.hidden = false
+        }
+        
         asyncPhotoDownload(photo, imageView: cell.imageView)
         
         return cell
@@ -178,6 +183,7 @@ extension PhotoCollectionViewController: UICollectionViewDataSource
     
     func collectionView(collectionView: UICollectionView, willDisplayCell cell: UICollectionViewCell, forItemAtIndexPath indexPath: NSIndexPath) {
         
+        // Start loading the next page, if there is more, when we reach the last cell
         if indexPath.row == self.photos.count - 1 {
             if ++currentPage <= totalPages {
                 isLoadingMore = true

@@ -51,20 +51,31 @@
                                                     <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F2X-JO-6nL">
+                                                    <rect key="frame" x="0.0" y="0.0" width="287" height="327"/>
+                                                    <state key="normal" image="image-videoplay">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                </button>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <constraints>
                                             <constraint firstItem="EDq-hj-LqX" firstAttribute="leading" secondItem="gkf-9L-Dij" secondAttribute="leading" id="1Fe-Wu-N89"/>
+                                            <constraint firstAttribute="trailing" secondItem="F2X-JO-6nL" secondAttribute="trailing" id="2Wt-CC-baA"/>
                                             <constraint firstItem="3ZS-h1-BR0" firstAttribute="top" secondItem="gkf-9L-Dij" secondAttribute="topMargin" id="AOU-1d-tZ4"/>
+                                            <constraint firstItem="F2X-JO-6nL" firstAttribute="leading" secondItem="gkf-9L-Dij" secondAttribute="leading" id="CMW-UT-0D1"/>
+                                            <constraint firstItem="F2X-JO-6nL" firstAttribute="top" secondItem="gkf-9L-Dij" secondAttribute="top" id="Cwm-e8-Fz8"/>
                                             <constraint firstItem="3ZS-h1-BR0" firstAttribute="leading" secondItem="gkf-9L-Dij" secondAttribute="leadingMargin" id="axu-oZ-CmE"/>
                                             <constraint firstItem="EDq-hj-LqX" firstAttribute="top" secondItem="gkf-9L-Dij" secondAttribute="top" id="clr-f8-M8x"/>
                                             <constraint firstAttribute="trailing" secondItem="EDq-hj-LqX" secondAttribute="trailing" id="cxU-pG-FJW"/>
                                             <constraint firstAttribute="bottom" secondItem="EDq-hj-LqX" secondAttribute="bottom" id="gNr-in-EDm"/>
+                                            <constraint firstAttribute="bottom" secondItem="F2X-JO-6nL" secondAttribute="bottom" id="qVZ-sU-407"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="idLabel" destination="3ZS-h1-BR0" id="Ajg-eg-jmu"/>
                                             <outlet property="imageView" destination="EDq-hj-LqX" id="NgC-bo-vie"/>
+                                            <outlet property="videoPlayButton" destination="F2X-JO-6nL" id="9xn-cl-zIO"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
@@ -114,4 +125,7 @@
             <point key="canvasLocation" x="119" y="-306"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="image-videoplay" width="44" height="44"/>
+    </resources>
 </document>

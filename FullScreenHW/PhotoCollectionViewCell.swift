@@ -12,11 +12,13 @@ class PhotoCollectionViewCell: UICollectionViewCell {
 
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var idLabel: UILabel!
+    @IBOutlet weak var videoPlayButton: UIButton!
     
     
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        self.imageView.image = nil
+        imageView.image = nil
+        videoPlayButton.hidden = true
     }
 }
