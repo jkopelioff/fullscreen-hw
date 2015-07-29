@@ -12,13 +12,17 @@ class PhotoCollectionViewController: UIViewController {
 
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var layout: UICollectionViewFlowLayout!
+    @IBOutlet var searchButton: UIBarButtonItem!
     
-    let kItemSpacing:CGFloat = 8.0
-    
+    var searchController:UISearchController!
+    var searchBar:UISearchBar!
     var refreshControl:UIRefreshControl!
+
+    let kItemSpacing:CGFloat = 10.0
+    let sectionInsets = UIEdgeInsets(top: 10.0, left: 20.0, bottom: 10.0, right: 20.0)
+
     var photos:[FlickrPhoto]!
     var imageCache:NSCache!
-    
     
     let kPageSize = 20
     var currentPage:Int = 1
@@ -28,29 +32,63 @@ class PhotoCollectionViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        title = "Recent"
         
+        //Setup CollectionView
         collectionView.delegate  = self
         collectionView.dataSource = self
         collectionView.alwaysBounceVertical = true
+        collectionView.backgroundColor = UIColor.clearColor()
         
         
         layout.minimumInteritemSpacing = kItemSpacing
         layout.minimumLineSpacing = kItemSpacing
         
+        //Load initial elements
         photos = [FlickrPhoto]()
-        FlickrService.loadRecent(1, perPage: 20, completion: didLoadPhotos)
+        FlickrService.recent(1, perPage: 20, completion: didLoadPhotos)
         
         //Add the refresh control
         refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "refreshPhotos", forControlEvents: UIControlEvents.ValueChanged)
         collectionView.addSubview(refreshControl)
         
+        //Create Cache
         imageCache = NSCache()
+        
+        //Add Search
+        addSearchController()
+    }
+    
+    func addSearchController() {
+        //Initialize Search Controller
+        
+        self.searchController = ({
+            
+            let controller = UISearchController(searchResultsController: nil)
+            controller.automaticallyAdjustsScrollViewInsets = false
+            controller.searchResultsUpdater = self
+            
+            controller.hidesNavigationBarDuringPresentation = false
+            controller.dimsBackgroundDuringPresentation = false
+            
+            controller.searchBar.delegate = self
+            controller.searchBar.placeholder = "Search"
+            controller.searchBar.showsScopeBar = false
+            controller.searchBar.sizeToFit()
+            controller.searchBar.returnKeyType = UIReturnKeyType.Search
+            controller.searchBar.translucent = true
+            
+            self.searchBar = controller.searchBar
+            self.definesPresentationContext = true
+            
+            return controller
+        })()
     }
     
     func refreshPhotos() {
         currentPage = 1
-        FlickrService.loadRecent(currentPage, perPage: kPageSize, completion: didLoadPhotos)
+        FlickrService.recent(currentPage, perPage: kPageSize, completion: didLoadPhotos)
     }
     
     func didLoadPhotos(photos:[FlickrPhoto]?, totalPages:Int, error:NSError?) {
@@ -101,6 +139,15 @@ class PhotoCollectionViewController: UIViewController {
         }
         
     }
+    
+    //- MARK: Actions
+    
+    @IBAction func searchTapped(sender: AnyObject) {
+        self.navigationItem.rightBarButtonItem = nil
+        self.navigationItem.titleView = self.searchBar
+        self.searchBar.becomeFirstResponder()
+    }
+    
 
 }
 
@@ -123,7 +170,7 @@ extension PhotoCollectionViewController: UICollectionViewDataSource
         
         let photo:FlickrPhoto = self.photos[indexPath.row]
         
-        cell.titleLabel.text = photo.title
+        cell.idLabel.text = String(photo.id)
         asyncPhotoDownload(photo, imageView: cell.imageView)
         
         return cell
@@ -134,7 +181,7 @@ extension PhotoCollectionViewController: UICollectionViewDataSource
         if indexPath.row == self.photos.count - 1 {
             if ++currentPage <= totalPages {
                 isLoadingMore = true
-                FlickrService.loadRecent(currentPage, perPage: kPageSize, completion: didLoadPhotos)
+                FlickrService.recent(currentPage, perPage: kPageSize, completion: didLoadPhotos)
             }
         }
     }
@@ -149,13 +196,56 @@ extension PhotoCollectionViewController: UICollectionViewDelegateFlowLayout
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         
-        let maxWidth:CGFloat = self.collectionView.frame.width/2 - (2 * kItemSpacing)
-       
-        return CGSizeMake(maxWidth, maxWidth)
+        let photo:FlickrPhoto = self.photos[indexPath.row]
         
+        if let size = photo.size() {
+            return size
+        } else {
+            return CGSizeMake(100.0, 100.0)
+        }
         
+    }
+    
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAtIndex section: Int) -> UIEdgeInsets {
+        return sectionInsets
     }
     
     
 }
+
+// MARK: -
+// MARK: UISearchBarDelegate
+
+extension PhotoCollectionViewController: UISearchBarDelegate
+{
+    func removeSearchBar() {
+        self.navigationItem.titleView = nil
+        self.navigationItem.rightBarButtonItem = self.searchButton
+    }
+    
+    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+        removeSearchBar()
+    }
+    
+    func searchBarTextDidEndEditing(searchBar: UISearchBar) {
+        removeSearchBar()
+    }
+    
+}
+
+// MARK: -
+// MARK: UISearchResultsUpdating
+
+extension PhotoCollectionViewController: UISearchResultsUpdating
+{
+    func updateSearchResultsForSearchController(searchController: UISearchController) {
+        if let text = searchController.searchBar.text where count(searchController.searchBar.text) > 0 {
+            FlickrService.search(1, perPage: 20, text: text, completion: didLoadPhotos)
+        } else  {
+            FlickrService.recent(1, perPage: 20, completion: didLoadPhotos)
+        }
+    }
+
+}
+
 

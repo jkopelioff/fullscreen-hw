@@ -6,7 +6,12 @@
 //  Copyright (c) 2015 Joel Kopelioff. All rights reserved.
 //
 
-import Foundation
+import UIKit
+
+enum FlickrPhotoType:String {
+    case Photo = "photo"
+    case Video = "video"
+}
 
 struct FlickrPhoto
 {
@@ -15,6 +20,7 @@ struct FlickrPhoto
     var imageUrl:String!
     var imageWidth:Int!
     var imageHeight:Int!
+    var type:FlickrPhotoType!
     var ownerName:String!
     
     init( photoData:NSDictionary )
@@ -24,7 +30,18 @@ struct FlickrPhoto
         self.imageUrl = photoData.valueForKey("url_n") as? String
         self.imageWidth = convertToInt(photoData.valueForKey("width_n"))
         self.imageHeight = convertToInt(photoData.valueForKey("height_n"))
+        self.type = FlickrPhotoType(rawValue: photoData.valueForKey("media") as! String)
         self.ownerName = photoData.valueForKey("ownername") as? String
+    }
+    
+    
+    func size() -> CGSize?
+    {
+        if self.imageHeight != nil && self.imageWidth != nil {
+            return CGSizeMake(CGFloat(self.imageWidth/2), CGFloat(self.imageHeight/2))
+        } else {
+            return nil
+        }
     }
     
     

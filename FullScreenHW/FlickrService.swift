@@ -8,21 +8,37 @@
 
 import Foundation
 
-enum FlickrServiceMethods:String {
+enum FlickrServiceMethod:String {
     case Recent = "flickr.photos.getRecent"
+    case Search = "flickr.photos.search"
     
 }
 
 class FlickrService {
     
-    static func loadRecent(page:Int, perPage:Int, completion: (photos: [FlickrPhoto]?, totalPages:Int, error:NSError?) -> Void)
+    static func recent(page:Int, perPage:Int, completion: (photos: [FlickrPhoto]?, totalPages:Int, error:NSError?) -> Void)
     {
-        let session = NSURLSession.sharedSession()
-        var params:String = "?method=\(FlickrServiceMethods.Recent.rawValue)&api_key=\(kFlickrKey)&extras=url_n,owner_name&per_page=\(perPage)&page=\(page)&format=json&nojsoncallback=1"
+        makeRequest(FlickrServiceMethod.Recent, page: page, perPage: perPage, text: nil, completion: completion)
+    }
     
+    static func search(page:Int, perPage:Int, text:String, completion: (photos: [FlickrPhoto]?, totalPages:Int, error:NSError?) -> Void)
+    {
+        makeRequest(FlickrServiceMethod.Search, page: page, perPage: perPage, text:text, completion: completion)
+    }
+    
+    static func makeRequest(method:FlickrServiceMethod, page:Int, perPage:Int, text:String?, completion: (photos: [FlickrPhoto]?, totalPages:Int, error:NSError?) -> Void) {
+        
+        let session = NSURLSession.sharedSession()
+        var params:String = "?method=\(method.rawValue)&api_key=\(kFlickrKey)&extras=url_n,owner_name,media&per_page=\(perPage)&page=\(page)&format=json&nojsoncallback=1"
+        
+        if text != nil {
+            // TODO: Validate incoming text to not contain malicious characters.
+            params += "&text=" + text!
+        }
+        
         
         if let flickrUrl = NSURL(string: kFlickrUrl + params) {
-    
+            
             var task = session.dataTaskWithURL(flickrUrl) {
                 (data, response, error) -> Void in
                 
@@ -39,7 +55,7 @@ class FlickrService {
                         var flickrPhotos = [FlickrPhoto]()
                         
                         if let photos = jsonDict.valueForKeyPath("photos.photo") as? NSArray {
-                        
+                            
                             for photo in photos {
                                 let photo = FlickrPhoto(photoData: photo as! NSDictionary)
                                 flickrPhotos.append(photo)
@@ -60,6 +76,7 @@ class FlickrService {
             NSLog("Error with Flickr URL: %@", kFlickrUrl + params)
             completion(photos: nil, totalPages: 0, error: nil)
         }
+        
+        
     }
-    
 }
